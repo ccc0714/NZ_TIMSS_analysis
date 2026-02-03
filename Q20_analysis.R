@@ -12,11 +12,12 @@ library(BART)
 set.seed(123)
 setDTthreads(1)
 
-BCG<-as.data.frame(read.spss("2019Data/bcgnzlm7.sav"))
-BSG<-as.data.frame(read.spss("2019Data/bsgnzlm7.sav"))
-BST<-as.data.frame(read.spss("2019Data/bstnzlm7.sav"))
-BTM<-as.data.frame(read.spss("2019Data/btmnzlm7.sav"))
-BTS<-as.data.frame(read.spss("2019Data/btsnzlm7.sav"))
+#Make sure to edit your file directory
+BCG<-as.data.frame(read.spss("yourdirectory/bcgnzlm7.sav"))
+BSG<-as.data.frame(read.spss("yourdirectory/bsgnzlm7.sav"))
+BST<-as.data.frame(read.spss("yourdirectory/bstnzlm7.sav"))
+BTM<-as.data.frame(read.spss("yourdirectory/btmnzlm7.sav"))
+BTS<-as.data.frame(read.spss("yourdirectory/btsnzlm7.sav"))
 
 #Math Data
 BST_BTM<-merge(BST, BTM, by="IDTEALIN")
@@ -96,7 +97,6 @@ maths_other<-c("BSMMAT01.x", "BSMMAT02.x", "BSMMAT03.x",
 
 
 maths_treatment<-c("BTBM20A", "BTBM20B", "BTBM20C", "BTBM20D", "BTBM20E")
-
 
 science_vars<-c("BSDAGE", "BSBG01", "BSBG03", "BSBG04", "BSBG07",
                 "BSBG08A", "BSBG08B",
@@ -339,179 +339,3 @@ my_mod <- fast_bart(X1,
 
 #save results
 save(my_mod, file = "ModelResultsNoHW5.RData", compress = "xz")
-
-Y<-cbind(XY$BSMMAT04.x, XY$BSSSCI04.x)
-
-X1<-cbind(X, p, p2, p3, p4, p5, p6, p7, p8, p9, p10)
-
-sourceCpp(file = "E:\\Summer Research\\BCF\\NZ_MVBCF.cpp")
-
-group_id<-as.integer(as.factor(XY$IDCLASS.x.x)) - 1
-
-group_id_test<-rep(group_id, 16)
-
-my_mod <- fast_bart(X1, 
-                    Y, 
-                    Z1,
-                    Z2,
-                    Z3,
-                    Z4,
-                    Z5,
-                    X,
-                    X1[1:3,],
-                    X[1:3,],
-                    0.95, 
-                    2, 
-                    0.25, 
-                    3, 
-                    diag((1)^2/n_tree_mu, 2), 
-                    diag((0.3)^2/n_tree_tau, 2), 
-                    1, 
-                    diag(1, 2), 
-                    n_iter, 
-                    n_tree_mu, 
-                    n_tree_tau, 
-                    1, 
-                    group_id,
-                    group_id_test,
-                    diag(0.1, 2),
-                    matrix(0, nrow=2, ncol=1),
-                    diag(0.01, 2),
-                    1,
-                    n_burn,
-                    2)
-
-#save results
-save(my_mod, file = "ModelResultsNoHW4.RData", compress = "xz")
-
-Y<-cbind(XY$BSMMAT03.x, XY$BSSSCI03.x)
-
-X1<-cbind(X, p, p2, p3, p4, p5, p6, p7, p8, p9, p10)
-
-sourceCpp(file = "E:\\Summer Research\\BCF\\NZ_MVBCF.cpp")
-
-group_id<-as.integer(as.factor(XY$IDCLASS.x.x)) - 1
-
-group_id_test<-rep(group_id, 16)
-
-my_mod <- fast_bart(X1, 
-                    Y, 
-                    Z1,
-                    Z2,
-                    Z3,
-                    Z4,
-                    Z5,
-                    X,
-                    X1[1:3,],
-                    X[1:3,],
-                    0.95, 
-                    2, 
-                    0.25, 
-                    3, 
-                    diag((1)^2/n_tree_mu, 2), 
-                    diag((0.3)^2/n_tree_tau, 2), 
-                    1, 
-                    diag(1, 2), 
-                    n_iter, 
-                    n_tree_mu, 
-                    n_tree_tau, 
-                    1, 
-                    group_id,
-                    group_id_test,
-                    diag(0.1, 2),
-                    matrix(0, nrow=2, ncol=1),
-                    diag(0.01, 2),
-                    1,
-                    n_burn,
-                    2)
-
-#save results
-save(my_mod, file = "ModelResultsNoHW3.RData", compress = "xz")
-
-Y<-cbind(XY$BSMMAT02.x, XY$BSSSCI02.x)
-
-X1<-cbind(X, p, p2, p3, p4, p5, p6, p7, p8, p9, p10)
-
-sourceCpp(file = "E:\\Summer Research\\BCF\\NZ_MVBCF.cpp")
-
-group_id<-as.integer(as.factor(XY$IDCLASS.x.x)) - 1
-
-group_id_test<-rep(group_id, 16)
-
-my_mod <- fast_bart(X1, 
-                    Y, 
-                    Z1,
-                    Z2,
-                    Z3,
-                    Z4,
-                    Z5,
-                    X,
-                    X1[1:3,],
-                    X[1:3,],
-                    0.95, 
-                    2, 
-                    0.25, 
-                    3, 
-                    diag((1)^2/n_tree_mu, 2), 
-                    diag((0.3)^2/n_tree_tau, 2), 
-                    1, 
-                    diag(1, 2), 
-                    n_iter, 
-                    n_tree_mu, 
-                    n_tree_tau, 
-                    1, 
-                    group_id,
-                    group_id_test,
-                    diag(0.1, 2),
-                    matrix(0, nrow=2, ncol=1),
-                    diag(0.01, 2),
-                    1,
-                    n_burn,
-                    2)
-
-#save results
-save(my_mod, file = "ModelResultsNoHW2.RData", compress = "xz")
-
-Y<-cbind(XY$BSMMAT01.x, XY$BSSSCI01.x)
-
-X1<-cbind(X, p, p2, p3, p4, p5, p6, p7, p8, p9, p10)
-
-sourceCpp(file = "E:\\Summer Research\\BCF\\NZ_MVBCF.cpp")
-
-group_id<-as.integer(as.factor(XY$IDCLASS.x.x)) - 1
-
-group_id_test<-rep(group_id, 16)
-
-my_mod <- fast_bart(X1, 
-                    Y, 
-                    Z1,
-                    Z2,
-                    Z3,
-                    Z4,
-                    Z5,
-                    X,
-                    X1[1:3,],
-                    X[1:3,],
-                    0.95, 
-                    2, 
-                    0.25, 
-                    3, 
-                    diag((1)^2/n_tree_mu, 2), 
-                    diag((0.3)^2/n_tree_tau, 2), 
-                    1, 
-                    diag(1, 2), 
-                    n_iter, 
-                    n_tree_mu, 
-                    n_tree_tau, 
-                    1, 
-                    group_id,
-                    group_id_test,
-                    diag(0.1, 2),
-                    matrix(0, nrow=2, ncol=1),
-                    diag(0.01, 2),
-                    1,
-                    n_burn,
-                    2)
-
-#save results
-save(my_mod, file = "ModelResultsNoHW1.RData", compress = "xz")
