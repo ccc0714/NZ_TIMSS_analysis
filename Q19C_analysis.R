@@ -9,13 +9,18 @@ library(Rcpp)
 library(foreign)
 library(BART)
 
+#set random seed
 set.seed(42)
 
-BCG<-as.data.frame(read.spss("2019Data/bcgnzlm7.sav"))
-BSG<-as.data.frame(read.spss("2019Data/bsgnzlm7.sav"))
-BST<-as.data.frame(read.spss("2019Data/bstnzlm7.sav"))
-BTM<-as.data.frame(read.spss("2019Data/btmnzlm7.sav"))
-BTS<-as.data.frame(read.spss("2019Data/btsnzlm7.sav"))
+#Use one thread
+setDTthreads(1)
+
+#Make sure to edit the file directory
+BCG<-as.data.frame(read.spss("yourdirectory/bcgnzlm7.sav"))
+BSG<-as.data.frame(read.spss("yourdirectory/bsgnzlm7.sav"))
+BST<-as.data.frame(read.spss("yourdirectory/bstnzlm7.sav"))
+BTM<-as.data.frame(read.spss("yourdirectory/btmnzlm7.sav"))
+BTS<-as.data.frame(read.spss("yourdirectory/btsnzlm7.sav"))
 
 #Math Data
 BST_BTM<-merge(BST, BTM, by="IDTEALIN")
@@ -93,7 +98,7 @@ maths_vars<-c("BSDAGE", "BSBG01", "BSBG03", "BSBG04", "BSBG07",
 maths_other<-c("BSMMAT01.x", "BSMMAT02.x", "BSMMAT03.x", 
                "BSMMAT04.x", "BSMMAT05.x", "IDCLASS.x", "TOTWGT", "IDSTUD")
 
-
+#maths_treatment not used in this analysis
 maths_treatment<-c("BSBM26AA", "BSBM26BA")
 
 science_vars<-c("BSDAGE", "BSBG01", "BSBG03", "BSBG04", "BSBG07",
@@ -116,6 +121,7 @@ science_vars<-c("BSDAGE", "BSBG01", "BSBG03", "BSBG04", "BSBG07",
 science_other<-c("BSSSCI01.x", "BSSSCI02.x", "BSSSCI03.x",
                  "BSSSCI04.x", "BSSSCI05.x", "IDCLASS.x", "TOTWGT", "IDSTUD")
 
+#science_treatment not used in this analysis 
 science_treatment<-c("BSBS26AB", "BSBS26BB")
 
 XYM<-BSG_BST_BTM_BCG[,c(maths_vars, maths_other, maths_treatment)]
@@ -335,3 +341,4 @@ my_mod <- fast_bart(X1,
 
 #save results
 save(my_mod, file = "Q19CModelChain1.RData", compress = "xz")
+
