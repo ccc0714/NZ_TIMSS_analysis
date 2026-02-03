@@ -10,6 +10,12 @@ library(Rcpp)
 set.seed(123)
 setDTthreads(1)
 
+load("data/bcgnzlm8.rdata")
+load("data/bsgnzlm8.rdata")
+load("data/bstnzlm8.rdata")
+load("data/btmnzlm8.rdata")
+load("data/btsnzlm8.rdata")
+
 BCG <- BCGNZLM8 #School context data files
 BSG <- BSGNZLM8 #Student context data files
 BST <- BSTNZLM8 #Student-teacher linkage files
@@ -294,3 +300,4 @@ my_mod <- fast_bart(X1,
                     2)
 #save results
 save(my_mod, file = "ModelResultsChain1.RData", compress = "xz")
+
