@@ -215,28 +215,6 @@ for (i in target){
 #BTBM19CC = Math Teacher discuss homework in class, #BTBS18CC = Science Teacher discuss homework in class
 prop.table(wtable(temp$IDCNTRY.x.x, temp[["BTBM19CB"]], temp$TOTWGT), 1)
 
-#-----------------------------------------------------------------------------
-NZ_XY <- XY %>% filter(IDCNTRY.x.x == "New Zealand")
-prop.table(wtable(XY$IDCNTRY.x.x, XY[["BTBM20E"]], XY$TOTWGT), 1)
-prop.table(wtable(XY$IDCNTRY.x.x, XY[["BTBS15A"]], XY$TOTWGT), 1)
-prop.table(wtable(XY$IDCNTRY.x.x, XY[["BTBM19A"]], XY$TOTWGT), 1)
-prop.table(wtable(XY$IDCNTRY.x.x, XY[["BTBS19E"]], XY$TOTWGT), 1)
-prop.table(wtable(XY$IDCNTRY.x.x, XY[["BTBM15A"]], XY$TOTWGT), 1)
-prop.table(wtable(XY$IDCNTRY.x.x, XY[["BSBM26AA"]], XY$TOTWGT), 1)
-prop.table(wtable(XY$IDCNTRY.x.x, XY[["BTBM19A"]], XY$TOTWGT), 1)
-prop.table(wtable(XY$IDCNTRY.x.x, XY[["BSBS26AB"]], XY$TOTWGT), 1)
-
-
-
-
-filter_XY <- NZ_XY %>% filter(BTBS15A == "Some lessons" & (BTBM20E == "A lot"|BTBM20E == "Some") )
-prop.table(wtable(filter_XY$IDCNTRY.x.x, filter_XY[["BSBM26AA"]], filter_XY$TOTWGT), 1)
-temp <- select(filter_XY, BSBM26AA, BSBS26AB, BTBM19A, BTBS18A)
-#Find out the teacher responses for homework frequency
-
-view(temp)
-
-
 #----------------------Plot for treatment heterogeneity------------------------------------
 extract_full_cates <- function(file_path) {
   load(file_path)
@@ -248,7 +226,7 @@ extract_full_cates <- function(file_path) {
   )
 }
 
-# 2. Average across all 5 chains (Plausible Values)
+# 2. loading all 5 chains (Plausible Values)
 model_files <- paste0(
   "C:\\CCC\\Summer Research\\BCF_result\\Ver2\\ModelResultsChain",
   1:5,
@@ -258,21 +236,18 @@ model_files <- paste0(
 all_chains <- lapply(model_files, extract_full_cates)
 final_averages <- Reduce(`+`, all_chains) / length(all_chains)
 
-# 3. Combine with full XY metadata
 final_results <- final_averages %>%
   bind_cols(NZ_XY %>% select(BSDGEDUP.x, BSBG04.x))
 
 plot_ready <- final_results %>% 
-  # 1. Pivot subject and frequency
+  #  Pivot subject and frequency
   pivot_longer(cols = starts_with("math") | starts_with("sci"), 
                names_to = "Sub_Freq", values_to = "ATE") %>%
   separate(Sub_Freq, into = c("Subject", "Freq_Low", "Freq_High"), sep = "_") %>% 
   mutate(Frequency = paste(Freq_Low, Freq_High, "Times/Week")) %>% 
-  # 2. Pivot moderators
+  # Pivot moderators
   pivot_longer(cols = c(BSDGEDUP.x, BSBG04.x), 
                names_to = "Moderator_Type", values_to = "Moderator_Value") %>% 
-  # 3. REMOVE NA VALUES
-  # This removes students who didn't report education or books
   filter(!is.na(Moderator_Value), 
          !Moderator_Value %in% c("Omitted or invalid", "Don't Know")) %>%  # 4. Clean up labels
   mutate(Subject = ifelse(Subject == "math", "Mathematics", "Science"), 
@@ -290,7 +265,6 @@ ggplot(plot_ready, aes(x = Moderator_Value, y = ATE, fill = Frequency)) +
   )
 
 #-------------Plot for project based learning------------------
-# 1. Update selection to include your four specific variables
 final_results <- final_averages %>%
   bind_cols(NZ_XY %>% select(BTBM20E, BTBS19E, BTBM15A, BTBS15A))
 
@@ -302,12 +276,9 @@ plot_ready <- final_results %>%
   mutate(Frequency = paste(Freq_Low, Freq_High, "Times/Week"),
          Subject_Label = ifelse(Subject == "math", "Mathematics", "Science")) %>% 
   
-  # Pivot your four subject-specific moderators
   pivot_longer(cols = c(BTBM20E, BTBS19E, BTBM15A, BTBS15A), 
                names_to = "Var_Name", values_to = "Moderator_Value") %>%
   
-  # Logic Filter: Ensure Math CATEs only show Math variables (BTBM) 
-  # and Science CATEs only show Science variables (BTBS)
   filter(
     (Subject == "math" & grepl("BTBM", Var_Name)) | 
       (Subject == "sci"  & grepl("BTBS", Var_Name))
@@ -323,7 +294,7 @@ plot_ready <- final_results %>%
   filter(!is.na(Moderator_Value), 
          !Moderator_Value %in% c("Omitted or invalid", "Don't Know", "NA"))
 
-# 4. Generate the 2x2 Plot
+# Generate the 2x2 Plot
 ggplot(plot_ready, aes(x = Moderator_Value, y = ATE, fill = Frequency)) +
   geom_boxplot(outlier.shape = NA, width = 0.7) +
   # Facet by Subject (Rows) and Question Type (Columns)
@@ -335,5 +306,6 @@ ggplot(plot_ready, aes(x = Moderator_Value, y = ATE, fill = Frequency)) +
     fill = "Homework Frequency"
   ) +
   theme(strip.text = element_text(face = "bold"))
+
 
 
