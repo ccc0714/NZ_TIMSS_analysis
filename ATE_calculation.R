@@ -88,7 +88,7 @@ labels_hw <- c(
 
 #Homework frequency and duration
 model_files <- paste0(
-  "C:\\CCC\\VM\\Model Data\\2019Freq&DuraVer2\\ModelResultsChain",
+  "yourdirectory\\ModelResultsChain",
   1:5,
   ".RData"
 )
@@ -104,7 +104,7 @@ view(ate_hw_results)
 
 #Question 20
 model_files <- paste0(
-  "C:\\CCC\\VM\\Model Data\\Q20_newmodel\\ModelResultsNoHW",
+  "yourdirectory\\ModelResultsNoHW",
   1:5,
   ".RData"
 )
@@ -119,7 +119,7 @@ ate_q20_results <- calculate_ate(models, labels_Q20, XY$TOTWGT.x)
 
 #Question 19C 
 model_files <- paste0(
-  "C:\\CCC\\Summer Research\\BCF_result\\Q19C\\Q19CModelChain",
+  "yourdirectory\\Q19CModelChain",
   1:5,
   ".RData"
 )
@@ -135,9 +135,9 @@ ate_q19c_results <- calculate_ate(models, labels_Q19C, XY$TOTWGT.x)
 #--------------2023 Frequency ATE------------------------------
 #Make sure to run the 2023 XY data before calculating ATE 
 #2023 XY data can be loaded from the file TIMSS2023_NZ_analysis.R
-
+#The code below can be run for both student and teacher analysis of homework frequency in 2023
 model_files <- paste0(
-  "C:\\CCC\\VM\\Model Data\\2023Frequency\\ModelResultsChain",
+  "yourdirectory\\ModelResultsChain",
   1:5,
   ".RData"
 )
@@ -219,4 +219,5 @@ for (i in 1:n_subject) {     # Math / Science
 }
 
 View(ate_df)
+
 
