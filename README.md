@@ -9,7 +9,13 @@ Due to github having a file size limit of 25mb, Model results will be stored in 
 
 * MVBCF_model - This folder contain the MVBCF model from Nathan McJames and another modified model (NZ_MVBCF) that consist of 5 tau trees
 
-* analysis_code - This folder contain the code used descriptive analysis and Average Treatment Effect (ATE) calculation
+* analysis_code - This folder contain the code used for running the MVBCF model on homework related variables such as duration and frequency
+  - Q19C_analysis is for analyzing the effect of homework follow-up variables on student achievement
+  - Q20_analysis is for analyzing the effect of classroom practices other than homework on student achievement
+  - TIMSS2019/2023_NZ_analysis is for analyzing the effect of student reported homework duration and frequency on student achievement
+  - TIMSS2019/2023_NZ_teacher_analysis is for analyzing the effect of teacher reported homework duration and frequency on student achievement
+
+
 
 
 
