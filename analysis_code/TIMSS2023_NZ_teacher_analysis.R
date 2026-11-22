@@ -10,11 +10,11 @@ library(Rcpp)
 set.seed(123)
 setDTthreads(1)
 
-load("data/bcgnzlm8.rdata")
-load("data/bsgnzlm8.rdata")
-load("data/bstnzlm8.rdata")
-load("data/btmnzlm8.rdata")
-load("data/btsnzlm8.rdata")
+load("2023Data/bcgnzlm8.rdata")
+load("2023Data/bsgnzlm8.rdata")
+load("2023Data/bstnzlm8.rdata")
+load("2023Data/btmnzlm8.rdata")
+load("2023Data/btsnzlm8.rdata")
 
 BCG <- BCGNZLM8 #School context data files
 BSG <- BSGNZLM8 #Student context data files
@@ -263,7 +263,7 @@ Y<-cbind(impute_XY$BSMMAT01.x, impute_XY$BSSSCI01.x)
 
 X1<-cbind(X, p, p2, p3, p4, p5, p6, p7, p8)
 
-sourceCpp(file = "E:\\Summer Research\\BCF\\HomeworkModelGitHub.cpp")
+sourceCpp(file = "BCF_model/HomeworkModelGitHub.cpp")
 
 group_id<-as.integer(as.factor(impute_XY$IDCLASS.x.x)) - 1
 

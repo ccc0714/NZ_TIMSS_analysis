@@ -62,22 +62,6 @@ calculate_ate <- function(model_list, treatment_labels, weights, n_subject = 2, 
   return(res_df)
 }
 
-labels_Q20 <- c(
-  "Observing student as they work",
-  "Asking students to answer questions during class",
-  "Short, regular written assessments",
-  "Longer test (unit tests or exams)",
-  "Long-term projects"
-)
-
-labels_Q19C <- c(
-  "Correct assignment + feedback",
-  "Student correct own homework",
-  "Discuss homework in class",
-  "Monitor homework completion",
-  "Homework contributes to grades"
-)
-
 labels_hw <- c(
   "Less than 15 minutes",
   "16–30 minutes",
@@ -101,36 +85,6 @@ for (m in 1:5) {
 
 ate_hw_results <- calculate_ate(models, labels_hw, XY$TOTWGT.x)
 view(ate_hw_results)
-
-#Question 20
-model_files <- paste0(
-  "yourdirectory\\ModelResultsNoHW",
-  1:5,
-  ".RData"
-)
-
-models <- vector("list", 5)
-for (m in 1:5) {
-  load(model_files[m])   # loads object: my_mod
-  models[[m]] <- my_mod
-}
-
-ate_q20_results <- calculate_ate(models, labels_Q20, XY$TOTWGT.x)
-
-#Question 19C 
-model_files <- paste0(
-  "yourdirectory\\Q19CModelChain",
-  1:5,
-  ".RData"
-)
-
-models <- vector("list", 5)
-for (m in 1:5) {
-  load(model_files[m])   # loads object: my_mod
-  models[[m]] <- my_mod
-}
-
-ate_q19c_results <- calculate_ate(models, labels_Q19C, XY$TOTWGT.x)
 
 #--------------2023 Frequency ATE------------------------------
 #Make sure to run the 2023 XY data before calculating ATE 

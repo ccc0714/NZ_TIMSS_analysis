@@ -13,11 +13,11 @@ set.seed(123)
 setDTthreads(1)
 
 #Make sure to edit your file directory
-BCG<-as.data.frame(read.spss("yourdirectory/bcgnzlm7.sav"))
-BSG<-as.data.frame(read.spss("yourdirectory/bsgnzlm7.sav"))
-BST<-as.data.frame(read.spss("yourdirectory/bstnzlm7.sav"))
-BTM<-as.data.frame(read.spss("yourdirectory/btmnzlm7.sav"))
-BTS<-as.data.frame(read.spss("yourdirectory/btsnzlm7.sav"))
+BCG<-as.data.frame(read.spss("2019Data/bcgnzlm7.sav"))
+BSG<-as.data.frame(read.spss("2019Data/bsgnzlm7.sav"))
+BST<-as.data.frame(read.spss("2019Data/bstnzlm7.sav"))
+BTM<-as.data.frame(read.spss("2019Data/btmnzlm7.sav"))
+BTS<-as.data.frame(read.spss("2019Data/btsnzlm7.sav"))
 
 #Math Data
 BST_BTM<-merge(BST, BTM, by="IDTEALIN")
@@ -384,7 +384,7 @@ Y<-cbind(XY$BSMMAT01.x, XY$BSSSCI01.x)
 
 X1<-cbind(X, p, p2, p3, p4, p5, p6, p7, p8, p9, p10)
 
-sourceCpp(file = "E:\\Summer Research\\BCF\\NZ_MVBCF.cpp")
+sourceCpp(file = "BCF_model/NZ_MVBCF.cpp")
 
 group_id<-as.integer(as.factor(XY$IDCLASS.x.x)) - 1
 

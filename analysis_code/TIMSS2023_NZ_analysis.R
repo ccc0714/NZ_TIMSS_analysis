@@ -8,11 +8,11 @@ library(dbarts)
 library(Rcpp)
 
 #Make sure to change xxx to your country iso3n code and your_directory to directory that stores the data
-load("yourdirectory/bcgnzlm8.rdata")
-load("yourdirectory/bsgnzlm8.rdata")
-load("yourdirectory/bstnzlm8.rdata")
-load("yourdirectory/btmnzlm8.rdata")
-load("yourdirectory/btsnzlm8.rdata")
+load("2023Data/bcgnzlm8.rdata")
+load("2023Data/bsgnzlm8.rdata")
+load("2023Data/bstnzlm8.rdata")
+load("2023Data/btmnzlm8.rdata")
+load("2023Data/btsnzlm8.rdata")
 
 BCG <- BCGNZLM8 #School context data files
 BSG <- BSGNZLM8 #Student context data files
@@ -261,7 +261,7 @@ Y<-cbind(impute_XY$BSMMAT01.x, impute_XY$BSSSCI01.x)
 
 X1<-cbind(X, p, p2, p3, p4, p5, p6, p7, p8)
 
-sourceCpp(file = "E:\\Summer Research\\BCF\\HomeworkModelGitHub.cpp")
+sourceCpp(file = "BCF_model/HomeworkModelGitHub.cpp")
 
 group_id<-as.integer(as.factor(impute_XY$IDCLASS.x.x)) - 1
 

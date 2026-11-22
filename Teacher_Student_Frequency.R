@@ -222,6 +222,10 @@ XYS<-mutate_at(XYS, c(1, 10:15, 26, 29:33, 35:37, 44:52, 57), mymap)
 
 XY<-merge(XYM, XYS, by="IDSTUD")
 
+#Jackknife codes for design-based standard errors
+source("jackknife_helpers.R")
+XY <- add_jk(XY, BSG)
+
 #--------------------------------------Student VS Teacher----------------------------------------
 # Variable Definitions
 math_class_id_var <- "IDCLASS.x.x"
@@ -306,8 +310,8 @@ mean_diff_sci
 # --- COMBINE DATA ---
 
 # Select only the difference and subject columns for binding
-math_for_plot <- math_paired_data %>% select(Subject, diff_freq = diff_freq_M, diff_time = diff_time_M)
-sci_for_plot <- sci_paired_data %>% select(Subject, diff_freq = diff_freq_S, diff_time = diff_time_S)
+math_for_plot <- math_paired_data_full %>% select(Subject, diff_freq = diff_freq_M, diff_time = diff_time_M)
+sci_for_plot <- sci_paired_data_full %>% select(Subject, diff_freq = diff_freq_S, diff_time = diff_time_S)
 
 # Combine the data for plotting
 combined_plot_data <- bind_rows(math_for_plot, sci_for_plot) %>%
@@ -408,3 +412,45 @@ mean_diff_sci2 <- mean(sci_paired_data$diff_freq_S, na.rm = TRUE)
 
 mean_diff_math2
 mean_diff_sci2
+
+#---------Testing significance (TIMSS jackknife)--------------------------
+#Each class appears once: project (1) vs other classes (0), both with at least 5 students.
+#Classes are weighted by the students they represent.
+math_class_info <- XY %>%
+  group_by(!!sym(math_class_id_var)) %>%
+  dplyr::summarize(
+    filtered = as.integer(dplyr::first(BTBM15A) == 1 & dplyr::first(BTBM20E) %in% c(1, 2)),
+    class_wt = sum(!!sym(math_weight_var), na.rm = TRUE),
+    JKZONE = dplyr::first(JKZONE),
+    JKREP = dplyr::first(JKREP),
+    .groups = 'drop'
+  )
+
+math_all <- math_paired_data_full %>%
+  inner_join(math_class_info, by = math_class_id_var) %>%
+  filter(N_Students_M >= 5, !is.na(diff_freq_M), !is.na(filtered))
+
+sci_class_info <- XY %>%
+  group_by(!!sym(science_class_id_var)) %>%
+  dplyr::summarize(
+    filtered = as.integer(dplyr::first(BTBS15A) == 1 & dplyr::first(BTBS19E) %in% c(1, 2)),
+    class_wt = sum(!!sym(sci_weight_var), na.rm = TRUE),
+    JKZONE = dplyr::first(JKZONE),
+    JKREP = dplyr::first(JKREP),
+    .groups = 'drop'
+  )
+
+sci_all <- sci_paired_data_full %>%
+  inner_join(sci_class_info, by = science_class_id_var) %>%
+  filter(N_Students_S >= 5, !is.na(diff_freq_S), !is.na(filtered))
+
+math_design <- jk_design(math_all, math_all$JKZONE, math_all$JKREP, math_all$class_wt)
+sci_design <- jk_design(sci_all, sci_all$JKZONE, sci_all$JKREP, sci_all$class_wt)
+
+#Weighted mean gap in project vs other classes
+svyby(~diff_freq_M, ~filtered, math_design, svymean)
+svyby(~diff_freq_S, ~filtered, sci_design, svymean)
+
+#filtered coefficient and its p-value test project vs other classes
+summary(svyglm(diff_freq_M ~ filtered, design = math_design))
+summary(svyglm(diff_freq_S ~ filtered, design = sci_design))

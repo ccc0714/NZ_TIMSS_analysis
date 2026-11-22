@@ -4,6 +4,7 @@ library(foreign)
 library(rcompanion)
 library(countrycode)
 library(scales)
+source("jackknife_helpers.R")
 
 NZ_BCG<-as.data.frame(read.spss("2019Data/bcgnzlm7.sav"))
 NZ_BSG<-as.data.frame(read.spss("2019Data/bsgnzlm7.sav"))
@@ -157,6 +158,41 @@ XY$IDCNTRY.x.x <- countrycode(XY$IDCNTRY.x.x, "iso3n", "country.name")
 XY <- XY %>% select(-ends_with(".y"))
 XY$TOTWGT <- as.numeric(as.character(XY$TOTWGT.x))
 XY <- XY %>% select(-TOTWGT.x) %>% droplevels()
+
+#Jackknife codes kept outside XY so the positional Cramér's V loop below is unaffected
+jk_lookup <- bind_rows(
+  add_jk(data.frame(IDSTUD = NZ_BSG$IDSTUD), NZ_BSG) %>%
+    mutate(country = countrycode(NZ_BSG$IDCNTRY, "iso3n", "country.name")),
+  add_jk(data.frame(IDSTUD = IR_BSG$IDSTUD), IR_BSG) %>%
+    mutate(country = countrycode(IR_BSG$IDCNTRY, "iso3n", "country.name"))
+)
+
+#Design-based (Rao-Scott) chi-square of country vs one variable, with weighted Cramér's V.
+#chisq.test on weighted counts treats the population total as the sample size, so p is always ~0.
+design_chisq <- function(var){
+  valid <- XY[!is.na(XY[[var]]) & !(XY[[var]] %in% c("Omitted or invalid", "Logically not applicable")), ]
+  valid$IDSTUD <- as.numeric(as.character(valid$IDSTUD))
+  valid <- left_join(valid, jk_lookup, by = c("IDSTUD", "IDCNTRY.x.x" = "country"))
+  valid[[var]] <- droplevels(factor(valid[[var]]))
+  valid$country <- factor(valid$IDCNTRY.x.x)
+
+  des <- jk_design(valid, paste(valid$country, valid$JKZONE), valid$JKREP, valid$TOTWGT)
+  test <- svychisq(as.formula(paste0("~", var, " + country")), des, statistic = "Chisq")
+
+  data <- wtable(valid$IDCNTRY.x.x, valid[[var]], valid$TOTWGT)
+  data <- data[, colSums(data) > 0, drop = FALSE]
+
+  #svychisq(statistic = "Chisq") prints the unadjusted Pearson X^2 but takes p from
+  #X^2 / mean design effect, so report the adjusted value that matches p
+  df <- unname(test$parameter)
+
+  data.frame(variable = var,
+             pearson_chisq = unname(test$statistic),
+             rao_scott_chisq = qchisq(test$p.value, df, lower.tail = FALSE),
+             df = df,
+             p_value = test$p.value,
+             cramers_v = cramerV(data))
+}
 #-----------------------------------------------------------------------------------------------------
 #Identifying V value for categorical variables against countries 
 
@@ -187,6 +223,12 @@ for (i in c(4:(ncol(XY)-1))) {
 #Index of Treatment variables are 28(BSBM26AA), 29(BSBM26BA), 47(BSBS26AB), 48(BSBS26BB)
 view_prop(25)
 
+#Design-based chi-square for the variables reported in Tables 1-4
+table_vars <- c("BSBM26AA", "BSBS26AB", "BSBM26BA", "BSBS26BB",
+                "BTBM20E", "BTBS19E", "BTBM15A", "BTBS15A")
+table_tests <- bind_rows(lapply(table_vars, design_chisq))
+table_tests
+
 #------------------------Omit Logically not applicable---------------------------------------------------------
 temp <- XY
 target <- c("BTBM19CD", "BTBS18CA", "BTBM19CA", "BTBS18CD", "BTBM19CB", "BTBM19CE", "BTBS18CB", "BTBS18CE", "BTBS18CC", "BTBM19CC")
@@ -201,7 +243,11 @@ new_prop <- data.frame(variable = character(n), v_df = numeric(n), v_value = num
 index <- 1
 for (i in target){
   variable <- i
-  data <- wtable(temp$IDCNTRY.x.x, temp[[i]], temp$TOTWGT)
+  #Exclude "Logically not applicable" for this item only (temp drops a student if any item is not applicable)
+  valid <- XY[!is.na(XY[[i]]) & !(XY[[i]] %in% c("Omitted or invalid", "Logically not applicable")), ]
+  valid[[i]] <- droplevels(valid[[i]])
+  data <- wtable(valid$IDCNTRY.x.x, valid[[i]], valid$TOTWGT)
+  data <- data[, colSums(data) > 0, drop = FALSE]
   v_value <- cramerV(data)
   v_df <- min(nrow(data)-1, ncol(data)-1)
   level <- classify_cramers_v(v_value, v_df)
@@ -211,6 +257,10 @@ for (i in target){
   new_prop$strength[index] <- level
   index <- index + 1
 }
+
+#Design-based chi-square for the same items
+new_prop_tests <- bind_rows(lapply(target, design_chisq))
+new_prop_tests
 
 #BTBM19CC = Math Teacher discuss homework in class, #BTBS18CC = Science Teacher discuss homework in class
 prop.table(wtable(temp$IDCNTRY.x.x, temp[["BTBM19CB"]], temp$TOTWGT), 1)
@@ -227,8 +277,9 @@ extract_full_cates <- function(file_path) {
 }
 
 # 2. loading all 5 chains (Plausible Values)
+#Use the 2019 student-reported results for Figs 4-5 and the 2019 teacher-reported results for Figs 6-7
 model_files <- paste0(
-  "C:\\CCC\\Summer Research\\BCF_result\\Ver2\\ModelResultsChain",
+  "yourdirectory\\ModelResultsChain",
   1:5,
   ".RData"
 )
